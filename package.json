@@ -1,0 +1,36 @@
+{
+  "name": "playwright_workflows",
+  "version": "1.0.0",
+  "description": "Playwright automation workflow testing",
+  "main": "index.js",
+
+  "scripts": {
+    "test": "playwright test"
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anjana0894-qa/playwright_workflows.git"
+  },
+
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+
+  "bugs": {
+    "url": "https://github.com/anjana0894-qa/playwright_workflows/issues"
+  },
+
+  "homepage": "https://github.com/anjana0894-qa/playwright_workflows#readme",
+
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "exceljs": "^3.4.0"
+  },
+
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@types/node": "^26.1.1"
+  }
+}
