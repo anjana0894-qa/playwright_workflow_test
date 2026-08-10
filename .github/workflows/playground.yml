@@ -5,9 +5,7 @@ on:
     branches:
       - main
 
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   test:
@@ -26,22 +24,6 @@ jobs:
           owner: anjana0894-qa
           repositories: qa-reports-dashboard
 
-      - name: Test write access to QA dashboard
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          git clone https://x-access-token:${GH_TOKEN}@github.com/anjana0894-qa/qa-reports-dashboard.git qa-dashboard
-          echo "GitHub App write access works" > qa-dashboard/test.txt
-
-          cd qa-dashboard
-
-          git config user.name "QA Reports Publisher"
-          git config user.email "qa-reports-publisher@users.noreply.github.com"
-
-          git add test.txt
-          git commit -m "Test GitHub App write access"
-          git push
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -56,6 +38,32 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test tests/playground.spec.js
+
+      - name: Publish Playwright report
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/anjana0894-qa/qa-reports-dashboard.git qa-dashboard
+
+          rm -rf qa-dashboard/reports/playground
+          mkdir -p qa-dashboard/reports/playground
+
+          cp -r playwright-report/. qa-dashboard/reports/playground/
+
+          cd qa-dashboard
+
+          git config user.name "QA Reports Publisher"
+          git config user.email "qa-reports-publisher@users.noreply.github.com"
+
+          git add reports/playground
+
+          if git diff --cached --quiet; then
+            echo "No report changes to commit"
+          else
+            git commit -m "Publish Playwright report"
+            git push
+          fi
 
       - name: Upload Playwright Report
         if: always()
