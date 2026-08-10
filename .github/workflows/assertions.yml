@@ -37,7 +37,18 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Assertions tests
+        id: tests
+        continue-on-error: true
         run: npx playwright test tests/assertions.spec.js
+
+      - name: Set test status
+        if: always()
+        run: |
+          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+            echo "STATUS=passed" >> "$GITHUB_ENV"
+          else
+            echo "STATUS=failed" >> "$GITHUB_ENV"
+          fi
 
       - name: Publish Assertions Playwright report
         if: always()
@@ -50,6 +61,14 @@ jobs:
           mkdir -p qa-dashboard/reports/assertions
 
           cp -r playwright-report/. qa-dashboard/reports/assertions/
+
+          cat > qa-dashboard/reports/assertions/metadata.json <<EOF
+          {
+            "module": "Assertions",
+            "status": "${STATUS}",
+            "lastRun": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+          EOF
 
           cd qa-dashboard
 
@@ -71,3 +90,7 @@ jobs:
         with:
           name: assertions-playwright-report
           path: playwright-report/
+
+      - name: Fail workflow if tests failed
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
