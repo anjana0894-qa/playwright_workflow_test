@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      USERNAME: ${{ secrets.USERNAME }}
-      PASSWORD: ${{ secrets.PASSWORD }}
+      cmd_username: ${{ secrets.CMD_USERNAME }}
+      cmd_password: ${{ secrets.CMD_PASSWORD }}
 
 
     steps:
