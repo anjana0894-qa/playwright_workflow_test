@@ -1,0 +1,73 @@
+name: Frames Tab Tests
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate as QA Reports GitHub App
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.QA_REPORTS_APP_ID }}
+          private-key: ${{ secrets.QA_REPORTS_PRIVATE_KEY }}
+          owner: anjana0894-qa
+          repositories: qa-reports-dashboard
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Frames Tab tests
+        run: npx playwright test tests/framesTab.spec.js
+
+      - name: Publish Frames Tab Playwright report
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/anjana0894-qa/qa-reports-dashboard.git qa-dashboard
+
+          rm -rf qa-dashboard/reports/frames-tab
+          mkdir -p qa-dashboard/reports/frames-tab
+
+          cp -r playwright-report/. qa-dashboard/reports/frames-tab/
+
+          cd qa-dashboard
+
+          git config user.name "QA Reports Publisher"
+          git config user.email "qa-reports-publisher@users.noreply.github.com"
+
+          git add reports/frames-tab
+
+          if git diff --cached --quiet; then
+            echo "No report changes to commit"
+          else
+            git commit -m "Publish Frames Tab Playwright report"
+            git push
+          fi
+
+      - name: Upload Frames Tab Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frames-tab-playwright-report
+          path: playwright-report/
