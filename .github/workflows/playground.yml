@@ -24,7 +24,7 @@ jobs:
           app-id: ${{ secrets.QA_REPORTS_APP_ID }}
           private-key: ${{ secrets.QA_REPORTS_PRIVATE_KEY }}
           owner: anjana0894-qa
-          repositories: qa-reports
+          repositories: qa-reports-dashboard
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
