@@ -26,6 +26,22 @@ jobs:
           owner: anjana0894-qa
           repositories: qa-reports-dashboard
 
+      - name: Test write access to QA dashboard
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/anjana0894-qa/qa-reports-dashboard.git qa-dashboard
+          echo "GitHub App write access works" > qa-dashboard/test.txt
+
+          cd qa-dashboard
+
+          git config user.name "QA Reports Publisher"
+          git config user.email "qa-reports-publisher@users.noreply.github.com"
+
+          git add test.txt
+          git commit -m "Test GitHub App write access"
+          git push
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
